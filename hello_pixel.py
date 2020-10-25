@@ -5,7 +5,7 @@ def main():
     height = 360
     width = 1920
     blank_image = np.zeros((height,width,3), np.uint8)
-    #
+    ###############################
     # cv2.resize(src, dsize[, dst[, fx[, fy[, interpolation]]]])
     for i in range(1):
         for j in range(4):
