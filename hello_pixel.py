@@ -11,6 +11,7 @@ width = 4096
 input_image_num = 90
 tile_width = 4096 // 5
 tile_height = 4096 // 9
+index = 1
 
 # assign a blank canvas
 blank_image = np.zeros((height, width, 3), np.uint8)
@@ -29,12 +30,16 @@ def main():
             feed_image_str = "0" + str(feed_image)
         
         # read img
-        img = cv.imread("./Label/" + "00" + str(feed_image_str) + ".png")
+        
+        # for debugging
+        # img = cv.imread("./Label/" + "00" + str(feed_image_str) + ".png")
 
+        img = cv.imread("00" + str(feed_image_str) + ".png")
         print ("str feed: " + str(feed_image_str))
 
         canvas_paint(img, i)
-    cv.imwrite("Tile_generate_L.png", blank_image)
+    
+    cv.imwrite("Tile_generate_" + str(index) + ".png", blank_image)
 
 
 def canvas_paint(img, i):
