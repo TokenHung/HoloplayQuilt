@@ -16,16 +16,13 @@ tile_height = 4096 // 9
 blank_image = np.zeros((height, width, 3), np.uint8)
 
 def main():
-    # Try samling
-    # sampling_interval = input_image_num // PARALLAX
     sampling_interval = input_image_num // PARALLAX
 
     # imread for 45 parallax
     for i in range(1, PARALLAX + 1):
         index_for_feed_image = (i + parallax_per_pic - 1) // parallax_per_pic
-        # feed_image = index_for_feed_image + (index_for_feed_image - 1) * sampling_interval * parallax_per_pic
         feed_image = 1 + (index_for_feed_image - 1) * sampling_interval * parallax_per_pic
-        # feed_image_str = feed_image >= 10 ? str(feed_image) : "0" + str(feed_image)
+
         if (feed_image >= 10):
             feed_image_str = str(feed_image)
         else:
@@ -42,37 +39,17 @@ def main():
 
 def canvas_paint(img, i):
     print("******debugging, index: " + str(i))
+
     # cv2.resize(src, dsize[, dst[, fx[, fy[, interpolation]]]])
-    #cv.imshow("aaa", img)
-    #cv.waitKey(0)
-    #cv.destroyAllWindows()
+    # cv.imshow("Preview", img)
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
     img = cv.resize(img ,(tile_width, tile_height))
 
-    # j = (i % 5 == 0)? 5 : i % 5
     j = i % 5 if (i % 5 != 0) else 5
     k = i // 5 if (i % 5 != 0) else i // 5 -1
     
     blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
-
-    '''Old######################################### 
-        if (i * sample < 10):
-            img = cv.imread("000" + str(i * sample) + ".png")
-        else:
-            img = cv.imread("00" + str(i * sample) + ".png")
-        
-
-        # debugging
-        print("now " + str(i))
-
-        # j = (i % 5 == 0)? 5 : i % 5
-        j = i % 5 if (i % 5 != 0) else 5
-        k = i // 5 if (i % 5 != 0) else i // 5 -1
-        blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
-        #blank_image[((i-1) % 5) * tile_width : (i % 5) * tile_width, ((i-1) % 9) * tile_height : (i % 9) * tile_height] = img
-        #plt.imshow(img)
-        #plt.show()
-        #img = cv.imread("00.png')
-    '''
 
     '''
     px = img[100, 100]
