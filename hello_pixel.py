@@ -17,8 +17,11 @@ fps = 15
 blank_image = np.zeros((height, width, 3), np.uint8)
 seconds = 0
 cur_seconds = 0
+RawImgPath = "RawPng/Toy/"
 
 def main():
+    jpg_save(RawImgPath, img, jpg_quality=10)
+    
     sampling_interval = input_image_num // PARALLAX
     # imread for 45 parallax
     for seconds in range(0, 10):
@@ -44,7 +47,7 @@ def main():
                 # for debugging
                 # img = cv.imread("./Label/" + "00" + str(feed_image_str) + ".png")
 
-                img = cv.imread("0" + feed_image_str + ".png")
+                img = cv.imread(RawImgPath + "0" + feed_image_str + ".png")
                 print ("str feed: " + feed_image_str)
                 
                 canvas_paint(img, i, seconds)
@@ -54,22 +57,35 @@ def main():
 
 def canvas_paint(img, i, seconds):
     print("******debugging, index: " + str(i))
-    # cur_playtime = frame_fps
     # img = cv.resize(img ,(tile_width, tile_height))
     # fake zoom in 
-    
-    img = cv.resize(img ,(tile_width + seconds * 5, tile_height + seconds * 5))
-    crop_img = img[0 + seconds * 5 : tile_height + seconds * 5, 0 + seconds * 5 : tile_width + seconds * 5].copy()
-
+    #img = cv.resize(img ,(tile_width + seconds * 5, tile_height + seconds * 5))
+    #crop_img = img[0 + seconds * 5 : tile_height + seconds * 5, 0 + seconds * 5 : tile_width + seconds * 5].copy()
+        
+    img = cv.resize(img ,(tile_width, tile_height))
     j = i % 5 if (i % 5 != 0) else 5
     k = i // 5 if (i % 5 != 0) else i // 5 -1
     
-    blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = crop_img
+    blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
 
     # cv2.resize(src, dsize[, dst[, fx[, fy[, interpolation]]]])
     # cv.imshow("Preview", img)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
+
+def jpg_save(path, image, jpg_quality=None, png_compression=None):
+    '''
+    persist :image: object to disk. if path is given, load() first.
+    jpg_quality: for jpeg only. 0 - 100 (higher means better). Default is 95.
+    png_compression: For png only. 0 - 9 (higher means a smaller size and longer compression time).
+                    Default is 3.
+    '''
+    if (jpg_quality):
+        cv2.imwrite(path, image, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
+    elif png_compression:
+        cv2.imwrite(path, image, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+    else:
+        cv2.imwrite(path, image)
 
 if __name__ == '__main__':
     main()
