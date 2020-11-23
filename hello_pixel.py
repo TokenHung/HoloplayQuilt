@@ -1,5 +1,7 @@
 import numpy as np
 import cv2 as cv
+import urllib
+
 from matplotlib import pyplot as plt
 
 # GLOBAL
@@ -20,8 +22,8 @@ cur_seconds = 0
 RawImgPath = "RawPng/Toy/"
 
 def main():
-    jpg_save(RawImgPath, img, jpg_quality=10)
-    
+    # jpg_save(RawImgPath, img, jpg_quality = 10)
+
     sampling_interval = input_image_num // PARALLAX
     # imread for 45 parallax
     for seconds in range(0, 10):
@@ -52,7 +54,7 @@ def main():
                 
                 canvas_paint(img, i, seconds)
 
-            cv.imwrite("frame/Tile_generate__" + str(seconds * 15 + frame_index) + ".png", blank_image)
+            cv.imwrite("frame/Tile_generate__" + str(seconds * 15 + frame_index) + ".jpg", blank_image)
 
 
 def canvas_paint(img, i, seconds):
@@ -65,15 +67,36 @@ def canvas_paint(img, i, seconds):
     img = cv.resize(img ,(tile_width, tile_height))
     j = i % 5 if (i % 5 != 0) else 5
     k = i // 5 if (i % 5 != 0) else i // 5 -1
+    print(img.shape)
+    img_encode = cv.imencode(".jpg", img, [int(cv.IMWRITE_JPEG_QUALITY), 10])
+    # print(img_encode.shape)
+    #blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
     
-    blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
+    #####
+    data_encode = np.array(img_encode, dtype="object")
+    str_encode =  str(data_encode)#.tostring
+    #####
 
+    with open("img_encode.txt", 'w') as f:
+        f.write(str_encode)
+        f.flush
+    
+    with open("img_encode.txt", 'r') as f:
+        str_encode = f.read()
+    # data = np.fromstring(data.getvalue(), dtype=np.uint8)
+    # image_decode = np.asarray(bytearray(str_encode), dtype="uint8")
+    image_decode = np.fromstring(str_encode, dtype=np.uint8)
+    image_decode = cv.imdecode(image_decode, cv.IMREAD_COLOR)
+    #cv.imshow('img_decode',image_decode)
+    #cv.waitKey()
+    blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = image_decode
+    
     # cv2.resize(src, dsize[, dst[, fx[, fy[, interpolation]]]])
     # cv.imshow("Preview", img)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-def jpg_save(path, image, jpg_quality=None, png_compression=None):
+def jpg_save(path, image, jpg_quality = None, png_compression = None):
     '''
     persist :image: object to disk. if path is given, load() first.
     jpg_quality: for jpeg only. 0 - 100 (higher means better). Default is 95.
@@ -81,11 +104,11 @@ def jpg_save(path, image, jpg_quality=None, png_compression=None):
                     Default is 3.
     '''
     if (jpg_quality):
-        cv2.imwrite(path, image, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
+        cv.imwrite(path, image, [int(cv.IMWRITE_JPEG_QUALITY), jpg_quality])
     elif png_compression:
-        cv2.imwrite(path, image, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+        cv.imwrite(path, image, [int(cv.IMWRITE_PNG_COMPRESSION), png_compression])
     else:
-        cv2.imwrite(path, image)
+        cv.imwrite(path, image)
 
 if __name__ == '__main__':
     main()
