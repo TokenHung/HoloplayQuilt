@@ -1,6 +1,20 @@
-import cv2
+import cv2 as cv
 import numpy as np
-def save(path, image, jpg_quality=None, png_compression=None):
+RawImgPath = "RawPng/DSLF - Castle/"
+def main():
+      
+  frame = cv.imread(RawImgPath + "0001.png")
+
+  ret,buf=cv.imencode("toto.jpg",frame, [int(cv.IMWRITE_JPEG_QUALITY), 10])
+  #bufjpg = bytearray(buf)
+  #fs = open("toto2.jpg", "wb")
+  #fs.write(bufjpg)
+  #print (str(buf[0:15]))
+  img=cv.imdecode(buf,cv.IMREAD_COLOR)
+  cv.imshow("img",img)
+  cv.waitKey(0)
+
+def jpg_save(path, image, jpg_quality=None, png_compression=None):
   '''
   persist :image: object to disk. if path is given, load() first.
   jpg_quality: for jpeg only. 0 - 100 (higher means better). Default is 95.
@@ -13,20 +27,8 @@ def save(path, image, jpg_quality=None, png_compression=None):
     cv2.imwrite(path, image, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
   else:
     cv2.imwrite(path, image)
-def main():
-    
-    imgpath = "RawPng/Toy/0001.png"
-    img = cv2.imread(imgpath)
-    #display the image
-    # cv2.imshow('Hanif_Life2Coding', img)
-    # save the image in JPEG format with 85% quality
-    outpath_jpeg = "Hanif_Save_JPEG.jpg"
-    save(outpath_jpeg, img, jpg_quality=10)
-    # outpath_png = "Hanif_Save_PNG.png"
-    # save the image in PNG format with 4 Compression
-    # save(outpath_png, img,png_compression=4)
-    cv2.waitKey(0)
-    #destroy a certain window
-    cv2.destroyWindow('Hanif_Life2Coding')
+
+
+
 if __name__ == "__main__":
     main()

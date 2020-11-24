@@ -1,0 +1,34 @@
+
+CIVIT Dataset: Horizontal-parallax-only densely-sampled light-fields
+
+
+*** Dataset description ***
+
+The dataset includes pre-rectified horizontal-parallax multi-perspective images of 3D scenes.
+
+Dataset specifications:
+  - Format: raw 8-bit R, G, B color channels.
+  - Resolution: 1280×720 pixels
+  - Images stored in PNG format
+  - Number of densely sampled images per dataset: 193 camera views
+  - The disparity range between adjacent views is 1 pixel at most
+
+
+*** Dataset info ***
+
+This dataset is provided by the Centre for Immersive Visual Technologies (CIVIT), Tampere University, Finland. 
+
+The dataset is available at: http://www.civit.fi. 
+
+If you use this dataset in your research, please refer to the following paper: 
+S. Moreschini, F. Gama, R. Bregovic, A. Gotchev, "CIVIT Dataset: Horizontal-parallax-only densely-sampled light-fields," in Proc. European Light Field Imaging Workshop 2019
+
+
+*** License ***
+
+This dataset is licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license.
+
+For more details regarding the licence, please visit:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+For commercial use please contact civit@tuni.fi.

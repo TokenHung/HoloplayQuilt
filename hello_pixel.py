@@ -1,108 +1,103 @@
 import numpy as np
 import cv2 as cv
 import urllib
-
+import os
 from matplotlib import pyplot as plt
 
 # GLOBAL
 # Ultimate input would be (PARALLAX_PER_PIC, height, width, horizontal_tile_num, vertical_tile_num)
-PARALLAX = 45
-parallax_per_pic = 1
 height = 4096
 width = 4096
-input_image_num = 180
+input_image_num = 193
 tile_width = 4096 // 5
 tile_height = 4096 // 9
-frame_index = 0
-fps = 15
+StepSize = 5
+Parallax_matrix = [45, 23, 15, 12, 9]
+PARALLAX = 45
+
 # assign a blank canvas
 blank_image = np.zeros((height, width, 3), np.uint8)
-seconds = 0
-cur_seconds = 0
-RawImgPath = "RawPng/Toy/"
+
+parallax_per_pic = 1
+RawImgPath = "RawPng/DSLF - Castle/"
+# RawPng/DSLF - Dragon
+# RawPng/DSLF - FLowers
+# RawPng/DSLF - Holiday
+# RawPng/DSLF - Seal and Balls
+# RawPng/DSLF - Toys
+
+cur_matrix = 0
+matrix_number = 5
+# quality_matrix[] = [[0 , 0]] * 5
+img_for_size = cv.imread(RawImgPath + "0001.png")
+img_for_size = cv.resize(img_for_size ,(tile_width, tile_height))
+last_matrix_jpg_quality = 95
+
 
 def main():
-    # jpg_save(RawImgPath, img, jpg_quality = 10)
+    index = 0
+    cur_jpg_quality = 95
+    cur_parallax_index = 0
+    while (not (cur_parallax_index == 4 and cur_jpg_quality == 15)):
+        # os.path.getsize('C:\\Python27\\Lib\\genericpath.py')
+        jpg_save("temp/last.jpg", img_for_size, jpg_quality = 95)
+        jpg_save("temp/cur.jpg", img_for_size, jpg_quality = cur_jpg_quality)
+        size_cur = os.path.getsize("temp/cur.jpg")
+        size_last = os.path.getsize("temp/last.jpg")
+        print(size_cur)
+        print(size_last)
 
-    sampling_interval = input_image_num // PARALLAX
-    # imread for 45 parallax
-    for seconds in range(0, 10):
-        j = 0
-        for frame_index in range(1,fps +1):
-            if (seconds % 2 == 0):
-                frame_modify = frame_index
+        if (cur_parallax_index != 4):        
+            if (size_cur * Parallax_matrix[cur_parallax_index] < size_last * Parallax_matrix[cur_parallax_index + 1]):
+                cur_jpg_quality = 95
+                cur_parallax_index = cur_parallax_index + 1
+                PARALLAX = Parallax_matrix[cur_parallax_index]
+                parallax_per_pic = cur_parallax_index + 1
+                print(PARALLAX)
             else:
-                frame_modify = fps -j
-            j = j + 1
-            for i in range(1, PARALLAX + 1):
-                index_for_feed_image = (i + parallax_per_pic - 1) // parallax_per_pic
-
-                feed_image = 1 + (index_for_feed_image - 1) * sampling_interval * parallax_per_pic + (frame_modify -1)
-
-                if (feed_image >= 100):
-                    feed_image_str = str(feed_image)
-                elif (100 > feed_image and feed_image >= 10):
-                    feed_image_str = "0" + str(feed_image)
-                else:
-                    feed_image_str = "00" + str(feed_image)
-                
-                # for debugging
-                # img = cv.imread("./Label/" + "00" + str(feed_image_str) + ".png")
-
-                img = cv.imread(RawImgPath + "0" + feed_image_str + ".png")
-                print ("str feed: " + feed_image_str)
-                
-                canvas_paint(img, i, seconds)
-
-            cv.imwrite("frame/Tile_generate__" + str(seconds * 15 + frame_index) + ".jpg", blank_image)
-
-
-def canvas_paint(img, i, seconds):
-    print("******debugging, index: " + str(i))
-    # img = cv.resize(img ,(tile_width, tile_height))
-    # fake zoom in 
-    #img = cv.resize(img ,(tile_width + seconds * 5, tile_height + seconds * 5))
-    #crop_img = img[0 + seconds * 5 : tile_height + seconds * 5, 0 + seconds * 5 : tile_width + seconds * 5].copy()
+                cur_jpg_quality = cur_jpg_quality - StepSize
+        else:
+            cur_jpg_quality = cur_jpg_quality - StepSize
         
+        for i in range(1, Parallax_matrix[0] + 1):
+            
+            # Read img from DSLF image sets 0001.png ~ 0193.png
+            feed_image_str = DSLF_raw_imread(i)
+
+            img = cv.imread(RawImgPath + feed_image_str)
+            print("*****" + feed_image_str)
+            canvas_paint(img, i)
+
+        img = jpg_codec(blank_image, cur_jpg_quality)
+        cv.imwrite("Quilt/Tile_generate__" + str(index) + ".jpg", img)
+        index = index + 1
+
+def canvas_paint(img, i):
     img = cv.resize(img ,(tile_width, tile_height))
     j = i % 5 if (i % 5 != 0) else 5
     k = i // 5 if (i % 5 != 0) else i // 5 -1
-    print(img.shape)
-    img_encode = cv.imencode(".jpg", img, [int(cv.IMWRITE_JPEG_QUALITY), 10])
-    # print(img_encode.shape)
-    #blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
-    
-    #####
-    data_encode = np.array(img_encode, dtype="object")
-    str_encode =  str(data_encode)#.tostring
-    #####
+    blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = img
 
-    with open("img_encode.txt", 'w') as f:
-        f.write(str_encode)
-        f.flush
+def jpg_codec(img, jpg_quality):
+    ret, buf = cv.imencode("Quilt/" + str(jpg_quality) + ".jpg", img, [int(cv.IMWRITE_JPEG_QUALITY), jpg_quality])
+    img = cv.imdecode(buf, cv.IMREAD_COLOR)
+    return img
+
+def DSLF_raw_imread(i):
+    sampling_interval = input_image_num // PARALLAX
+    index_for_feed_image = (i + parallax_per_pic - 1) // parallax_per_pic
+    feed_image = 1 + (index_for_feed_image - 1) * sampling_interval #* parallax_per_pic
     
-    with open("img_encode.txt", 'r') as f:
-        str_encode = f.read()
-    # data = np.fromstring(data.getvalue(), dtype=np.uint8)
-    # image_decode = np.asarray(bytearray(str_encode), dtype="uint8")
-    image_decode = np.fromstring(str_encode, dtype=np.uint8)
-    image_decode = cv.imdecode(image_decode, cv.IMREAD_COLOR)
-    #cv.imshow('img_decode',image_decode)
-    #cv.waitKey()
-    blank_image[k * tile_height : (k + 1) * tile_height, ((i - 1) % 5) * tile_width : j * tile_width] = image_decode
-    
-    # cv2.resize(src, dsize[, dst[, fx[, fy[, interpolation]]]])
-    # cv.imshow("Preview", img)
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
+    if (feed_image >= 100):
+        feed_image_str = "0" + str(feed_image)
+    elif (100 > feed_image and feed_image >= 10):
+        feed_image_str = "00" + str(feed_image)
+    else:
+        feed_image_str = "000" + str(feed_image)
+
+    return (feed_image_str + ".png")
 
 def jpg_save(path, image, jpg_quality = None, png_compression = None):
-    '''
-    persist :image: object to disk. if path is given, load() first.
-    jpg_quality: for jpeg only. 0 - 100 (higher means better). Default is 95.
-    png_compression: For png only. 0 - 9 (higher means a smaller size and longer compression time).
-                    Default is 3.
-    '''
     if (jpg_quality):
         cv.imwrite(path, image, [int(cv.IMWRITE_JPEG_QUALITY), jpg_quality])
     elif png_compression:
