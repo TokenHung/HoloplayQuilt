@@ -17,60 +17,57 @@ PARALLAX = 45
 # assign a blank canvas
 blank_image = np.zeros((height, width, 3), np.uint8)
 
-RawImgPath = "RawPng/DSLF - Castle/"
-# RawPng/DSLF - Dragon
-# RawPng/DSLF - FLowers
-# RawPng/DSLF - Holiday
-# RawPng/DSLF - Seal and Balls
-# RawPng/DSLF - Toys
-
-cur_matrix = 0
-matrix_number = 5
-# quality_matrix[] = [[0 , 0]] * 5
-img_for_size = cv.imread(RawImgPath + "0001.png")
-img_for_size = cv.resize(img_for_size ,(tile_width, tile_height))
-last_matrix_jpg_quality = 95
-
-
 def main():
-    index = 0
-    cur_jpg_quality = 95
-    cur_parallax_index = 0
-    parallax_per_pic = 1
-    while (not (cur_parallax_index == 4 and cur_jpg_quality == 20)):
-        # os.path.getsize('C:\\Python27\\Lib\\genericpath.py')
-        jpg_save("temp/last.jpg", img_for_size, jpg_quality = 95)
-        jpg_save("temp/cur.jpg", img_for_size, jpg_quality = cur_jpg_quality)
-        size_cur = os.path.getsize("temp/cur.jpg")
-        size_last = os.path.getsize("temp/last.jpg")
-        print(size_cur)
-        print(size_last)
+    f = 0
+    Folder = ["Toys","Castle", "Dragon", "Flowers", "Holiday", "Seal and Balls"]
+    for f in range(6):
+        index = 0
+        cur_jpg_quality = 95
+        cur_parallax_index = 0
+        parallax_per_pic = 1
+        last_matrix_jpg_quality = 95
+        cur_matrix = 0
+        matrix_number = 5
+        # quality_matrix[] = [[0 , 0]] * 5
+        InputFolder = Folder[f]
+        RawImgPath = "RawPng/DSLF - " + InputFolder + "/"
+        img_for_size = cv.imread(RawImgPath + "0001.png")
+        img_for_size = cv.resize(img_for_size ,(tile_width, tile_height))
+        while (not (cur_parallax_index == 4 and cur_jpg_quality == 20)):
+            # os.path.getsize('C:\\Python27\\Lib\\genericpath.py')
+            jpg_save("temp/last.jpg", img_for_size, jpg_quality = 95)
+            jpg_save("temp/cur.jpg", img_for_size, jpg_quality = cur_jpg_quality)
+            size_cur = os.path.getsize("temp/cur.jpg")
+            size_last = os.path.getsize("temp/last.jpg")
+            print(size_cur)
+            print(size_last)
 
-        if (cur_parallax_index != 4):        
-            if (size_cur * Parallax_matrix[cur_parallax_index] < size_last * Parallax_matrix[cur_parallax_index + 1]):
-                cur_jpg_quality = 95
-                cur_parallax_index = cur_parallax_index + 1
-                PARALLAX = Parallax_matrix[cur_parallax_index]
-                parallax_per_pic = cur_parallax_index + 1
-                print(parallax_per_pic)
-                print(PARALLAX)
+            if (cur_parallax_index != 4):        
+                if (size_cur * Parallax_matrix[cur_parallax_index] < size_last * Parallax_matrix[cur_parallax_index + 1]):
+                    cur_jpg_quality = 95
+                    cur_parallax_index = cur_parallax_index + 1
+                    PARALLAX = Parallax_matrix[cur_parallax_index]
+                    parallax_per_pic = cur_parallax_index + 1
+                    print(parallax_per_pic)
+                    print(PARALLAX)
+                else:
+                    cur_jpg_quality = cur_jpg_quality - StepSize
             else:
                 cur_jpg_quality = cur_jpg_quality - StepSize
-        else:
-            cur_jpg_quality = cur_jpg_quality - StepSize
-        
-        for i in range(1, Parallax_matrix[0] + 1):
             
-            # Read img from DSLF image sets 0001.png ~ 0193.png
-            feed_image_str = DSLF_raw_imread(i, parallax_per_pic)
+            for i in range(1, Parallax_matrix[0] + 1):
+                
+                # Read img from DSLF image sets 0001.png ~ 0193.png
+                feed_image_str = DSLF_raw_imread(i, parallax_per_pic)
 
-            img = cv.imread(RawImgPath + feed_image_str)
-            print("*****" + feed_image_str)
-            canvas_paint(img, i)
+                img = cv.imread(RawImgPath + feed_image_str)
+                #print("*****" + feed_image_str)
+                print("****" + Folder[f])
+                canvas_paint(img, i)
 
-        img = jpg_codec(blank_image, cur_jpg_quality)
-        cv.imwrite("Quilt/Castle/Tile_generate__" + str(index) + "__" + str(cur_jpg_quality) + "__" + str(Parallax_matrix[cur_parallax_index]) + ".jpg", img)
-        index = index + 1
+            img = jpg_codec(blank_image, cur_jpg_quality)
+            cv.imwrite("Quilt/" + InputFolder + "/Tile_generate__" + str(index) + "__" + str(cur_jpg_quality) + "__" + str(Parallax_matrix[cur_parallax_index]) + ".jpg", img)
+            index = index + 1
 
 def canvas_paint(img, i):
     img = cv.resize(img ,(tile_width, tile_height))
