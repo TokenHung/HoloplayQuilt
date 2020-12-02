@@ -11,7 +11,7 @@ width = 4096
 input_image_num = 193
 tile_width = 4096 // 5
 tile_height = 4096 // 9
-StepSize = 3
+StepSize = 5
 Parallax_matrix = [45, 23, 15, 12, 9]
 PARALLAX = 45
 # assign a blank canvas
@@ -19,23 +19,21 @@ blank_image = np.zeros((height, width, 3), np.uint8)
 
 def main():
     f = 0
+    last_parallax_downgrade = 95
     Folder = ["Toys","Castle", "Dragon", "Flowers", "Holiday", "Seal and Balls"]
     for f in range(6):
         index = 0
         cur_jpg_quality = 95
         cur_parallax_index = 0
         parallax_per_pic = 1
-        last_matrix_jpg_quality = 95
-        cur_matrix = 0
-        matrix_number = 5
-        # quality_matrix[] = [[0 , 0]] * 5
         InputFolder = Folder[f]
         RawImgPath = "RawPng/DSLF - " + InputFolder + "/"
         img_for_size = cv.imread(RawImgPath + "0001.png")
         img_for_size = cv.resize(img_for_size ,(tile_width, tile_height))
-        while (not (cur_parallax_index == 4 and cur_jpg_quality == 20)):
+        last_parallax_downgrade = cur_jpg_quality
+        while (not (cur_parallax_index == 4 and cur_jpg_quality < 10)):
             # os.path.getsize('C:\\Python27\\Lib\\genericpath.py')
-            jpg_save("temp/last.jpg", img_for_size, jpg_quality = 95)
+            jpg_save("temp/last.jpg", img_for_size, jpg_quality = last_parallax_downgrade)
             jpg_save("temp/cur.jpg", img_for_size, jpg_quality = cur_jpg_quality)
             size_cur = os.path.getsize("temp/cur.jpg")
             size_last = os.path.getsize("temp/last.jpg")
@@ -44,12 +42,15 @@ def main():
 
             if (cur_parallax_index != 4):        
                 if (size_cur * Parallax_matrix[cur_parallax_index] < size_last * Parallax_matrix[cur_parallax_index + 1]):
-                    cur_jpg_quality = 95
+                    # cur_jpg_quality = 95
                     cur_parallax_index = cur_parallax_index + 1
                     PARALLAX = Parallax_matrix[cur_parallax_index]
                     parallax_per_pic = cur_parallax_index + 1
                     print(parallax_per_pic)
                     print(PARALLAX)
+                    
+                    #jpg quality of last parallax downgrade
+                    last_parallax_downgrade = cur_jpg_quality
                 else:
                     cur_jpg_quality = cur_jpg_quality - StepSize
             else:
@@ -57,12 +58,11 @@ def main():
             
             for i in range(1, Parallax_matrix[0] + 1):
                 
-                # Read img from DSLF image sets 0001.png ~ 0193.png
                 feed_image_str = DSLF_raw_imread(i, parallax_per_pic)
 
                 img = cv.imread(RawImgPath + feed_image_str)
-                #print("*****" + feed_image_str)
-                print("****" + Folder[f])
+                print("*****" +Folder[f]+ feed_image_str)
+                
                 canvas_paint(img, i)
 
             img = jpg_codec(blank_image, cur_jpg_quality)
